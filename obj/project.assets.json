@@ -454,11 +454,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\omartest\\source\\repos\\h2o\\h2o.csproj",
+      "projectUniqueName": "C:\\Users\\omartest\\Desktop\\projects\\school\\h2o\\h2o.csproj",
       "projectName": "h2o",
-      "projectPath": "C:\\Users\\omartest\\source\\repos\\h2o\\h2o.csproj",
+      "projectPath": "C:\\Users\\omartest\\Desktop\\projects\\school\\h2o\\h2o.csproj",
       "packagesPath": "C:\\Users\\omartest\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\omartest\\source\\repos\\h2o\\obj\\",
+      "outputPath": "C:\\Users\\omartest\\Desktop\\projects\\school\\h2o\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages",
