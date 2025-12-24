@@ -1,0 +1,1 @@
+Visit swagger docs: <local url>/swagger/index.html
