@@ -15,6 +15,8 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// TODO Hier moet een Authenticatie en Authorisatie service toegevoegd worden.
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -24,8 +26,10 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+
 app.UseHttpsRedirection();
 
+// TODO UseAuthenticatie() implementatie moet hier.
 app.UseAuthorization();
 
 app.MapControllers();
