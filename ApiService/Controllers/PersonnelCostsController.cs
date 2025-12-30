@@ -1,11 +1,14 @@
 using ApiService.DAL;
+using ApiService.Helpers;
 using ApiService.Models;
 using ApiService.Models.DTOs;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace ApiService.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class PersonnelCostsController : ControllerBase
@@ -17,6 +20,14 @@ namespace ApiService.Controllers
         {
             _context = context;
             _logger = logger;
+        }
+
+        /// <summary>
+        /// Haalt de gemeentenaam op uit de user claims voor filtering
+        /// </summary>
+        private string? GetUserMunicipality()
+        {
+            return MunicipalityHelper.GetMunicipalityFromClaims(User);
         }
 
         /// <summary>
@@ -116,6 +127,8 @@ namespace ApiService.Controllers
         {
             try
             {
+                var municipality = GetUserMunicipality();
+
                 var query = _context.Begrotingsregels
                     .Include(br => br.Begroting)
                     .Include(br => br.Medewerker)
@@ -207,6 +220,8 @@ namespace ApiService.Controllers
         {
             try
             {
+                var municipality = GetUserMunicipality();
+
                 // Get realized costs from Dienstverband (employment records)
                 // Note: This is a simplified calculation. In reality, you'd calculate actual salary costs
                 // based on Dienstverband data, salary scales, etc.
@@ -323,6 +338,8 @@ namespace ApiService.Controllers
             string? organisatorischeEenheidCode,
             string? kostenplaatsCode)
         {
+            var municipality = GetUserMunicipality();
+
             // Get budgeted costs
             var budgetQuery = _context.Begrotingsregels
                 .Include(br => br.Begroting)
