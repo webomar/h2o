@@ -1,0 +1,30 @@
+name: Run Tests
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:  # Allows manual triggering
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '10.0.x'
+        
+    - name: Restore dependencies
+      run: dotnet restore H2o.slnx
+      
+    - name: Build
+      run: dotnet build H2o.slnx --no-restore -c Release
+      
+    - name: Run tests
+      run: dotnet test H2o.slnx --no-build -c Release --verbosity normal
+
