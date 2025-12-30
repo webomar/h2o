@@ -17,8 +17,6 @@ public class AdGroupResolverTests
         var wellKnownSid = new SecurityIdentifier(WellKnownSidType.WorldSid, null).Value;
 
         // Act & Assert
-        // Note: This test may throw if not run in a domain environment
-        // In a real scenario, you might want to use integration tests or mock the AD calls
         try
         {
             var result = resolver.Resolve(wellKnownSid);
