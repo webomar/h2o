@@ -1,17 +1,5 @@
-FullName;EmployeeNumber;Email;RegistratienummerAN;Dienstverbandnummer;FunctieAN;FunctiecodeAN;FTE;Salarisschaal Code;Ancienniteit;Datum indienst;Datum uitdienst (huidig);Soort Arbeidsrelatie Code;Som van Waarde;Periode Verwerkingsperiode + Oms;Maand salaris
-Smit, Daan;1003001 - Projectbureau;1888 - Loonkosten;Projectbureau;16328;10;Controller;F07069;0,5;12;3;19-05-2021;;VST;2180;2025-01 - Januari 2025;2180
-van Leeuwen, Sanne;1001001 - Projectbureau;1888 - Loonkosten;Projectbureau;41544;12;Werkvoorbereider;F06008;0,4;4;3;23-02-2024;;OPR;1170;2025-10 - Oktober 2025;1170
-Dekker, Pieter;1001002 - Waterbeheer;1888 - Loonkosten;Waterbeheer;16105;72;Consultant;F04056;1;11;7;16-02-2022;;VST;3780;2025-10 - Oktober 2025;3780
-Meijer, Noor;1002002 - Waterbeheer;1888 - Loonkosten;Waterbeheer;84868;82;Werkvoorbereider;F06076;0,4;5;30;19-11-2023;;VST;1370;2025-08 - Augustus 2025;1370
-van Leeuwen, Tessa;1001003 - Beheer & Onderhoud;1888 - Loonkosten;Beheer & Onderhoud;71027;75;Consultant;F04047;0,8;8;11;23-06-2015;;VST;2910;2025-10 - Oktober 2025;2910
-Bos, Laura;1002002 - Engineering;1888 - Loonkosten;Engineering;70983;86;Analist;F03073;0,6;1;30;24-03-2018;;TJD;1410;2025-02 - Februari 2025;1410
-Peters, Ruben;1001001 - HR;1888 - Loonkosten;HR;69852;91;Engineer;F02008;0,4;2;11;12-10-2012;;TJD;1020;2025-03 - Maart 2025;1020
-Dekker, Koen;1001002 - Waterbeheer;1888 - Loonkosten;Waterbeheer;12646;30;Projectmanager;F05008;0,8;16;24;23-10-2024;;TJD;4000;2025-09 - September 2025;4000
-Kok, Tom;1001001 - Financiën;1888 - Loonkosten;Financiën;91757;62;Developer;F01075;0,7;11;8;20-03-2018;;VST;2650;2025-07 - Juli 2025;2650
-Bakker, Hugo;1001002 - Projectbureau;1888 - Loonkosten;Projectbureau;69763;26;Controller;F07006;1;3;14;28-10-2014;;VST;2760;2025-07 - Juli 2025;2760
-Visser, Lisa;1003001 - Financiën;1888 - Loonkosten;Financiën;86164;10;Developer;F01028;0,6;12;6;19-06-2020;;OPR;2620;2025-12 - December 2025;2620
-Jansen, Iris;1001002 - HR;1888 - Loonkosten;HR;33227;77;Analist;F03044;0,8;11;16;29-12-2010;;OPR;3020;2025-08 - Augustus 2025;3020
-van der Meer, Amber;1002002 - Beheer & Onderhoud;1888 - Loonkosten;Beheer & Onderhoud;70629;74;Analist;F03012;0,8;14;14;22-11-2020;;VST;3460;2025-01 - Januari 2025;3460
-van Dijk, Mark;1002002 - Data & Analyse;1888 - Loonkosten;Data & Analyse;25263;31;Consultant;F04075;1;10;2;18-09-2014;;VST;4000;2025-09 - September 2025;4000
-Peters, Nina;1004001 - Waterbeheer;1888 - Loonkosten;Waterbeheer;67936;19;Engineer;F02091;0,7;3;18;19-12-2013;;VST;1890;2025-11 - November 2025;1890
-Mulder, Koen;1003001 - Financiën;1888 - Loonkosten;Financiën;44690;35;Werkvoorbereider;F06033;0,89;1;30;01-06-2011;;TJD;2110;2025-08 - Augustus 2025;2110
+EmployeeNumber;Achternaam;DienstverbandNummer;FunctieCode;FunctieNaam;Type;DatumInDienst;DatumUitDienst;Ancienniteit
+1001;Jansen;5001;DEV01;Software Developer;Vast;2020-03-01;;4
+1002;De Vries;5002;FIN02;Financieel Medewerker;Vast;2019-06-15;;5
+1003;Bakker;5003;HR01;HR Adviseur;Tijdelijk;2022-01-10;2024-01-09;2
+1004;Smit;5004;OPS03;Operations Manager;Vast;2018-09-01;;6

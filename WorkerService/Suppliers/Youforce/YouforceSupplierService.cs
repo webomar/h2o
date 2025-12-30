@@ -1,7 +1,4 @@
 ﻿using Microsoft.Extensions.Options;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using WorkerService.Configuration;
 using WorkerService.Csv;
 using WorkerService.Suppliers.Abstractions;

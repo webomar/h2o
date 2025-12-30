@@ -1,8 +1,5 @@
 ﻿using WorkerService.Configuration;
-using WorkerService.Conversion;
 using WorkerService.Csv;
-using WorkerService.Mapping;
-using WorkerService.Suppliers.Abstractions;
 using WorkerService.Suppliers.ErpX;
 using WorkerService.Suppliers.Youforce;
 
@@ -19,16 +16,9 @@ namespace WorkerService.DependencyInjection
 
             services.AddSingleton<ICsvReader, CsvReader>();
 
-            // Suppliers
-            services.AddSingleton<ISupplierService<YouforceCsvRecord>, YouforceSupplierService>();
-            services.AddSingleton<ISupplierService<ErpXCsvRecord>, ErpXSupplierService>();
-
-            // Mappers
-            services.AddSingleton<ISupplierMapper<YouforceCsvRecord>, YouforceMapper>();
-            services.AddSingleton<ISupplierMapper<ErpXCsvRecord>, ErpXMapper>();
-
-            services.AddSingleton<IMapperRegistry, MapperRegistry>();
-            services.AddSingleton<IConversionService, ConversionService>();
+            // ✅ CONCRETE supplier services
+            services.AddSingleton<YouforceSupplierService>();
+            services.AddSingleton<ErpXSupplierService>();
 
             return services;
         }
