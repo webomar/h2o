@@ -5,6 +5,13 @@ namespace ApiService.Helpers;
 
 public sealed class AdClaimsTransformer : IClaimsTransformation
 {
+    private readonly IAdGroupResolver _groupResolver;
+
+    public AdClaimsTransformer(IAdGroupResolver groupResolver)
+    {
+        _groupResolver = groupResolver;
+    }
+
     public Task<ClaimsPrincipal> TransformAsync(ClaimsPrincipal principal)
     {
         var identity = principal.Identity as ClaimsIdentity;
@@ -14,9 +21,12 @@ public sealed class AdClaimsTransformer : IClaimsTransformation
             return Task.FromResult(principal);
         }
 
-        foreach (var sidClaim in identity.FindAll(ClaimTypes.GroupSid))
+        // Collect all SIDs first to avoid modifying collection during enumeration
+        var sidClaims = identity.FindAll(ClaimTypes.GroupSid).ToList();
+        
+        foreach (var sidClaim in sidClaims)
         {
-            var groupName = AdGroupResolver.Resolve(sidClaim.Value);
+            var groupName = _groupResolver.Resolve(sidClaim.Value);
             
             if (groupName != null)
             {

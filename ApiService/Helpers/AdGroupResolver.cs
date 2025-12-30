@@ -5,9 +5,9 @@ using System.Security.Principal;
 namespace ApiService.Helpers;
 
 [SuppressMessage("Interoperability", "CA1416:Validate platform compatibility")]
-public static class AdGroupResolver
+public class AdGroupResolver : IAdGroupResolver
 {
-    public static string? Resolve(string sid)
+    public string? Resolve(string sid)
     {
         var sidObj = new SecurityIdentifier(sid);
 

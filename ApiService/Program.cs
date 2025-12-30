@@ -29,6 +29,7 @@ builder.Services
     .AddAuthentication(NegotiateDefaults.AuthenticationScheme)
     .AddNegotiate();
 
+builder.Services.AddSingleton<IAdGroupResolver, AdGroupResolver>();
 builder.Services.AddTransient<IClaimsTransformation, AdClaimsTransformer>();
 
 builder.Services.AddAuthorization(options =>
