@@ -1,5 +1,5 @@
-EmployeeNumber;Achternaam;DienstverbandNummer;FunctieCode;FunctieNaam;Type;DatumInDienst;DatumUitDienst;Ancienniteit
-1001;Jansen;5001;DEV01;Software Developer;Vast;2020-03-01;;4
-1002;De Vries;5002;FIN02;Financieel Medewerker;Vast;2019-06-15;;5
-1003;Bakker;5003;HR01;HR Adviseur;Tijdelijk;2022-01-10;2024-01-09;2
-1004;Smit;5004;OPS03;Operations Manager;Vast;2018-09-01;;6
+EmployeeNumber;DienstverbandNummer;Achternaam;FunctieCode;FunctieNaam;Type;DatumInDienst;DatumUitDienst;Ancienniteit
+1001;5001;Jansen;FUNC01;Software Developer;Vast;2019-03-01;;5
+1002;5002;Pieters;FUNC02;Project Manager;Vast;2018-01-15;;7
+1003;5003;DeVries;FUNC03;Finance Consultant;Tijdelijk;2021-06-01;2025-05-31;3
+1004;5004;Bakker;FUNC01;Software Developer;Vast;2020-09-01;;4

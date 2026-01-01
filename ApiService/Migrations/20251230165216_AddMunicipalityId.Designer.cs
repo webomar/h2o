@@ -4,6 +4,7 @@ using ApiService.DAL;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ApiService.Migrations
 {
     [DbContext(typeof(DatabaseContextApi))]
-    partial class DatabaseContextApiModelSnapshot : ModelSnapshot
+    [Migration("20251230165216_AddMunicipalityId")]
+    partial class AddMunicipalityId
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -122,9 +125,6 @@ namespace ApiService.Migrations
                     b.Property<DateTime?>("DatumUitDienst")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("ExternalNummer")
-                        .HasColumnType("int");
-
                     b.Property<string>("Functiecode")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
@@ -221,9 +221,6 @@ namespace ApiService.Migrations
                     b.Property<string>("Achternaam")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("ExternalNummer")
-                        .HasColumnType("int");
 
                     b.HasKey("Nummer");
 

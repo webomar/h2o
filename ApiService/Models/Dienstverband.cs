@@ -8,6 +8,8 @@ namespace ApiService.Models
         [Key]
         public int Nummer { get; set; }
 
+        public int ExternalNummer { get; set; } // Youforce DienstverbandNummer
+
         [ForeignKey(nameof(Medewerker))]
         public int MedewerkerNummer { get; set; }
 

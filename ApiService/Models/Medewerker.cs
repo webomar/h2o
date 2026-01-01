@@ -6,7 +6,7 @@ namespace ApiService.Models
     {
         [Key]
         public int Nummer { get; set; }
-
+        public int ExternalNummer { get; set; } // Youforce / ERP-X ID
         public string Achternaam { get; set; } = null!;
 
         // Navigation properties

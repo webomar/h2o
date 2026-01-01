@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using WorkerService.Configuration;
+﻿using WorkerService.Configuration;
 
 namespace WorkerService.Csv
 {

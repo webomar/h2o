@@ -6,7 +6,12 @@ namespace WorkerService.Assembly
     {
         private readonly Dictionary<int, MedewerkerAggregate> _buffer = new();
 
-        // Youforce
+        // 🔹 Stamdata (niet medewerker-gebonden)
+        private readonly Dictionary<string, KostenplaatsImport> _kostenplaatsen = new();
+
+        // ======================================================
+        // Youforce (HR)
+        // ======================================================
         public void ApplyYouforce(
             int medewerkerNummer,
             string achternaam,
@@ -18,7 +23,9 @@ namespace WorkerService.Assembly
             agg.Dienstverband = dienstverband;
         }
 
-        // ERP-X
+        // ======================================================
+        // ERP-X (Contracten)
+        // ======================================================
         public void ApplyErpXContract(
             int medewerkerNummer,
             ContractImport contract)
@@ -27,6 +34,9 @@ namespace WorkerService.Assembly
             agg.Contracten.Add(contract);
         }
 
+        // ======================================================
+        // ERP-X (Begroting)
+        // ======================================================
         public void ApplyErpXBegroting(
             int medewerkerNummer,
             BegrotingsregelImport regel)
@@ -35,7 +45,46 @@ namespace WorkerService.Assembly
             agg.Begrotingsregels.Add(regel);
         }
 
+        // ======================================================
+        // ERP-X (Inhuurkosten)
+        // ======================================================
+        public void ApplyErpXInhuurkosten(
+            int medewerkerNummer,
+            InhuurkostenImport kosten)
+        {
+            var agg = GetOrCreate(medewerkerNummer);
+            agg.Inhuurkosten.Add(kosten);
+        }
+
+        // ======================================================
+        // ERP-X (Transacties)
+        // ======================================================
+        public void ApplyErpXTransactie(
+            int medewerkerNummer,
+            TransactieImport transactie)
+        {
+            var agg = GetOrCreate(medewerkerNummer);
+            agg.Transacties.Add(transactie);
+        }
+
+        // ======================================================
+        // ERP-X (Kostenplaats – STAMDATA)
+        // ======================================================
+        public void ApplyErpXKostenplaats(KostenplaatsImport kostenplaats)
+        {
+            if (string.IsNullOrWhiteSpace(kostenplaats.Code))
+                return;
+
+            // Deduplicatie op Code
+            if (!_kostenplaatsen.ContainsKey(kostenplaats.Code))
+            {
+                _kostenplaatsen[kostenplaats.Code] = kostenplaats;
+            }
+        }
+
+        // ======================================================
         // Resultaat
+        // ======================================================
         public IReadOnlyCollection<MedewerkerAggregate> GetAll()
             => _buffer.Values.ToList();
 
@@ -45,7 +94,13 @@ namespace WorkerService.Assembly
         public IReadOnlyCollection<MedewerkerAggregate> GetIncomplete()
             => _buffer.Values.Where(x => !x.IsComplete).ToList();
 
+        // 🔹 Stamdata exports
+        public IReadOnlyCollection<KostenplaatsImport> GetKostenplaatsen()
+            => _kostenplaatsen.Values.ToList();
+
+        // ======================================================
         // Intern
+        // ======================================================
         private MedewerkerAggregate GetOrCreate(int nummer)
         {
             if (!_buffer.TryGetValue(nummer, out var agg))
@@ -54,6 +109,7 @@ namespace WorkerService.Assembly
                 {
                     Nummer = nummer
                 };
+
                 _buffer[nummer] = agg;
             }
 
