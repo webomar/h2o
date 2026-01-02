@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+  pull_request:   # Trigger on PRs
   workflow_dispatch:  # Allows manual triggering
 
 jobs:
