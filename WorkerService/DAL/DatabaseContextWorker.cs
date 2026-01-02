@@ -71,6 +71,10 @@ namespace WorkerService.DAL
             modelBuilder.Entity<Begroting>()
                 .HasKey(b => b.Jaar);
 
+            modelBuilder.Entity<Begroting>()
+                .Property(b => b.Jaar)
+                .ValueGeneratedNever();
+
             // Configure Begrotingsregel
             modelBuilder.Entity<Begrotingsregel>()
                 .HasKey(b => b.Id);

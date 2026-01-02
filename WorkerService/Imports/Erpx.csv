@@ -1,5 +1,0 @@
-RecordType;PersNr;Crediteur;Rekening;OrganisatorischeEenheidCode;BegrotingJaar;KostenplaatsCode;Bedrag;Kostensoort;InhuurJaar;InhuurMaand;InhuurBedrag;TransactieDatum;TransactieBedrag
-CONTRACT;1001;IT-Leverancier;4000;OE-IT;;;;;;;;;
-BEGROTING;1001;;;;2024;KP-IT;75000;Lasten;;;;;
-INHUUR;1001;;;;;;2024;3;12000;;
-TRANSACTIE;1001;IT-Leverancier;4000;;;;;;;2024-03-15;2500

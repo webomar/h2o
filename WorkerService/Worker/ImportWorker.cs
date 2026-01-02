@@ -11,20 +11,30 @@ namespace WorkerService.Worker
     public class ImportWorker : BackgroundService
     {
         private readonly ILogger<ImportWorker> _logger;
-        private readonly YouforceSupplierService _youforceSupplier;
-        private readonly ErpXSupplierService _erpXSupplier;
         private readonly IServiceScopeFactory _scopeFactory;
+
+        private readonly YouforceSupplierService _youforceSupplier;
+        private readonly ErpXContractSupplierService _contractSupplier;
+        private readonly ErpXBegrotingSupplierService _begrotingSupplier;
+        private readonly ErpXInhuurSupplierService _inhuurSupplier;
+        private readonly ErpXTransactieSupplierService _transactieSupplier;
 
         public ImportWorker(
             ILogger<ImportWorker> logger,
+            IServiceScopeFactory scopeFactory,
             YouforceSupplierService youforceSupplier,
-            ErpXSupplierService erpXSupplier,
-            IServiceScopeFactory scopeFactory)
+            ErpXContractSupplierService contractSupplier,
+            ErpXBegrotingSupplierService begrotingSupplier,
+            ErpXInhuurSupplierService inhuurSupplier,
+            ErpXTransactieSupplierService transactieSupplier)
         {
             _logger = logger;
-            _youforceSupplier = youforceSupplier;
-            _erpXSupplier = erpXSupplier;
             _scopeFactory = scopeFactory;
+            _youforceSupplier = youforceSupplier;
+            _contractSupplier = contractSupplier;
+            _begrotingSupplier = begrotingSupplier;
+            _inhuurSupplier = inhuurSupplier;
+            _transactieSupplier = transactieSupplier;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -53,138 +63,126 @@ namespace WorkerService.Worker
             var assembler = new MedewerkerAssembler();
 
             // ======================================================
-            // Youforce (HR)
+            // YOUFORCE
             // ======================================================
-            foreach (var record in _youforceSupplier.Fetch())
+            foreach (var r in _youforceSupplier.Fetch())
             {
                 assembler.ApplyYouforce(
-                    record.EmployeeNumber,
-                    record.Achternaam,
+                    r.EmployeeNumber,
+                    r.Achternaam,
                     new DienstverbandImport
                     {
-                        Nummer = record.DienstverbandNummer,
-                        Functiecode = record.FunctieCode,
-                        Functienaam = record.FunctieNaam,
-                        Type = record.Type,
-                        DatumInDienst = record.DatumInDienst,
-                        DatumUitDienst = record.DatumUitDienst,
-                        Ancienniteit = record.Ancienniteit
+                        Nummer = r.DienstverbandNummer,
+                        Functiecode = r.FunctieCode,
+                        Functienaam = r.FunctieNaam,
+                        Type = r.Type,
+                        DatumInDienst = r.DatumInDienst,
+                        DatumUitDienst = r.DatumUitDienst,
+                        Ancienniteit = r.Ancienniteit
                     });
             }
 
             // ======================================================
-            // ERP-X (RecordType gestuurd)
+            // ERP-X CONTRACTEN
             // ======================================================
-            foreach (var record in _erpXSupplier.Fetch())
+            foreach (var r in _contractSupplier.Fetch())
             {
-                switch (record.RecordType)
+                assembler.ApplyErpXContract(r.PersNr, new ContractImport
                 {
-                    case ErpXRecordType.CONTRACT:
-                        if (!string.IsNullOrWhiteSpace(record.Crediteur))
-                        {
-                            assembler.ApplyErpXContract(
-                                record.PersNr,
-                                new ContractImport
-                                {
-                                    Crediteur = record.Crediteur,
-                                    Rekening = record.Rekening,
-                                    OrganisatorischeEenheidCode = record.OrganisatorischeEenheidCode
-                                });
-                        }
-                        break;
+                    Crediteur = r.Crediteur,
+                    Rekening = r.Rekening,
+                    OrganisatorischeEenheidCode = r.OrganisatorischeEenheidCode
+                });
+            }
 
-                    case ErpXRecordType.BEGROTING:
-                        if (record.BegrotingJaar.HasValue &&
-                            record.Bedrag.HasValue)
-                        {
-                            assembler.ApplyErpXBegroting(
-                                record.PersNr,
-                                new BegrotingsregelImport
-                                {
-                                    BegrotingJaar = record.BegrotingJaar.Value,
-                                    KostenplaatsCode = record.KostenplaatsCode,
-                                    Bedrag = record.Bedrag.Value,
-                                    Kostensoort = ParseKostensoort(record.Kostensoort)
-                                });
-                        }
-                        break;
+            // ======================================================
+            // ERP-X BEGROTING
+            // ======================================================
+            foreach (var r in _begrotingSupplier.Fetch())
+            {
+                assembler.ApplyErpXBegroting(r.PersNr, new BegrotingsregelImport
+                {
+                    BegrotingJaar = r.BegrotingJaar,
+                    KostenplaatsCode = r.KostenplaatsCode,
+                    Bedrag = r.Bedrag,
+                    Kostensoort = ParseKostensoort(r.Kostensoort)
+                });
+            }
 
-                    case ErpXRecordType.INHUUR:
-                        if (record.InhuurJaar.HasValue &&
-                            record.InhuurMaand.HasValue &&
-                            record.InhuurBedrag.HasValue &&
-                            !string.IsNullOrWhiteSpace(record.KostenplaatsCode))
-                        {
-                            assembler.ApplyErpXInhuurkosten(
-                                record.PersNr,
-                                new InhuurkostenImport
-                                {
-                                    Jaar = record.InhuurJaar.Value,
-                                    Maand = record.InhuurMaand.Value,
-                                    KostenplaatsCode = record.KostenplaatsCode,
-                                    Bedrag = record.InhuurBedrag.Value,
-                                    Periode = new PeriodeImport
-                                    {
-                                        Jaar = record.InhuurJaar.Value,
-                                        Maand = record.InhuurMaand.Value,
-                                        Verwerking = false,
-                                        Label = $"{record.InhuurJaar}-{record.InhuurMaand:D2}"
-                                    }
-                                });
-                        }
-                        break;
+            // ======================================================
+            // ERP-X INHUUR
+            // ======================================================
+            foreach (var r in _inhuurSupplier.Fetch())
+            {
+                assembler.ApplyErpXInhuurkosten(r.PersNr, new InhuurkostenImport
+                {
+                    Jaar = r.Jaar,
+                    Maand = r.Maand,
+                    KostenplaatsCode = r.KostenplaatsCode,
+                    Bedrag = r.Bedrag,
+                    Periode = new PeriodeImport
+                    {
+                        Jaar = r.Jaar,
+                        Maand = r.Maand,
+                        Verwerking = false,
+                        Label = $"{r.Jaar}-{r.Maand:D2}"
+                    }
+                });
+            }
 
-                    case ErpXRecordType.TRANSACTIE:
-                        if (record.TransactieDatum.HasValue &&
-                            record.TransactieBedrag.HasValue &&
-                            !string.IsNullOrWhiteSpace(record.Crediteur))
-                        {
-                            assembler.ApplyErpXTransactie(
-                                record.PersNr,
-                                new TransactieImport
-                                {
-                                    Crediteur = record.Crediteur,
-                                    Rekening = record.Rekening,
-                                    Datum = record.TransactieDatum.Value,
-                                    Bedrag = record.TransactieBedrag.Value
-                                });
-                        }
-                        break;
-                }
+            // ======================================================
+            // ERP-X TRANSACTIES
+            // ======================================================
+            foreach (var r in _transactieSupplier.Fetch())
+            {
+                assembler.ApplyErpXTransactie(r.PersNr, new TransactieImport
+                {
+                    Crediteur = r.Crediteur,
+                    Rekening = r.Rekening,
+                    Datum = r.Datum,
+                    Bedrag = r.Bedrag
+                });
             }
 
             var aggregates = assembler.GetComplete();
 
             using var scope = _scopeFactory.CreateScope();
-            var dbContext = scope.ServiceProvider.GetRequiredService<DatabaseContextWorker>();
-            using var transaction = await dbContext.Database.BeginTransactionAsync(token);
+            var db = scope.ServiceProvider.GetRequiredService<DatabaseContextWorker>();
+            using var tx = await db.Database.BeginTransactionAsync(token);
 
             try
             {
+                EnsureOrganisatorischeEenheidExists(db, "ONBEKEND");
+
                 foreach (var agg in aggregates)
                 {
-                    PersistMedewerker(dbContext, agg);
-                    PersistBegrotingsregels(dbContext, agg);
-                    PersistInhuurkosten(dbContext, agg);
-                    PersistTransacties(dbContext, agg);
+                    var medewerker = PersistMedewerker(db, agg);
+                    PersistContracten(db, medewerker, agg);
+
+                    await db.SaveChangesAsync(token);
+
+                    PersistBegrotingsregels(db, agg, medewerker.Nummer);
+                    PersistInhuurkosten(db, agg);
+                    PersistTransacties(db, agg, medewerker.Nummer);
                 }
 
-                await dbContext.SaveChangesAsync(token);
-                await transaction.CommitAsync(token);
+                await db.SaveChangesAsync(token);
+                await tx.CommitAsync(token);
 
                 _logger.LogInformation("Import succesvol afgerond");
             }
             catch
             {
-                await transaction.RollbackAsync(token);
+                await tx.RollbackAsync(token);
                 throw;
             }
         }
 
         // ======================================================
-        // Persist methods
+        // PERSIST
         // ======================================================
-        private static void PersistMedewerker(DatabaseContextWorker db, MedewerkerAggregate agg)
+
+        private static Medewerker PersistMedewerker(DatabaseContextWorker db, MedewerkerAggregate agg)
         {
             var medewerker = db.Medewerkers
                 .Include(m => m.Dienstverband)
@@ -197,29 +195,35 @@ namespace WorkerService.Worker
                 db.Medewerkers.Add(medewerker);
             }
 
-            medewerker.Achternaam = agg.Achternaam!;
+            medewerker.Achternaam = agg.Achternaam;
 
-            if (medewerker.Dienstverband == null)
-                medewerker.Dienstverband = new Dienstverband
-                {
-                    ExternalNummer = agg.Dienstverband!.Nummer
-                };
+            if (agg.Dienstverband != null)
+            {
+                EnsureFunctieExists(db, agg.Dienstverband.Functiecode, agg.Dienstverband.Functienaam);
 
-            EnsureFunctieExists(db, agg.Dienstverband!.Functiecode, agg.Dienstverband.Functienaam);
+                if (medewerker.Dienstverband == null)
+                    medewerker.Dienstverband = new Dienstverband();
 
-            medewerker.Dienstverband.Functiecode = agg.Dienstverband.Functiecode;
-            medewerker.Dienstverband.Type = agg.Dienstverband.Type;
-            medewerker.Dienstverband.DatumInDienst = agg.Dienstverband.DatumInDienst;
-            medewerker.Dienstverband.DatumUitDienst = agg.Dienstverband.DatumUitDienst;
-            medewerker.Dienstverband.Ancienniteit = agg.Dienstverband.Ancienniteit;
+                medewerker.Dienstverband.ExternalNummer = agg.Dienstverband.Nummer;
+                medewerker.Dienstverband.Functiecode = agg.Dienstverband.Functiecode;
+                medewerker.Dienstverband.Type = agg.Dienstverband.Type;
+                medewerker.Dienstverband.DatumInDienst = agg.Dienstverband.DatumInDienst;
+                medewerker.Dienstverband.DatumUitDienst = agg.Dienstverband.DatumUitDienst;
+                medewerker.Dienstverband.Ancienniteit = agg.Dienstverband.Ancienniteit;
+            }
 
+            return medewerker;
+        }
+
+        private static void PersistContracten(DatabaseContextWorker db, Medewerker medewerker, MedewerkerAggregate agg)
+        {
             foreach (var c in agg.Contracten)
             {
                 EnsureOrganisatorischeEenheidExists(db, c.OrganisatorischeEenheidCode);
 
                 if (!medewerker.Contracten.Any(x =>
-                    x.Crediteur == c.Crediteur &&
-                    x.Rekening == c.Rekening))
+                        x.Crediteur == c.Crediteur &&
+                        x.Rekening == c.Rekening))
                 {
                     medewerker.Contracten.Add(new Contract
                     {
@@ -231,17 +235,17 @@ namespace WorkerService.Worker
             }
         }
 
-        private static void PersistBegrotingsregels(DatabaseContextWorker db, MedewerkerAggregate agg)
+        private static void PersistBegrotingsregels(DatabaseContextWorker db, MedewerkerAggregate agg, int medewerkerId)
         {
             foreach (var r in agg.Begrotingsregels)
             {
                 EnsureBegrotingExists(db, r.BegrotingJaar);
-                EnsureKostenplaatsExists(db, r.KostenplaatsCode);
+                EnsureKostenplaatsExists(db, r.KostenplaatsCode, "ONBEKEND");
 
                 db.Begrotingsregels.Add(new Begrotingsregel
                 {
                     BegrotingJaar = r.BegrotingJaar,
-                    MedewerkerNummer = agg.Nummer,
+                    MedewerkerNummer = medewerkerId,
                     KostenplaatsCode = r.KostenplaatsCode,
                     Bedrag = r.Bedrag,
                     Kostensoort = r.Kostensoort ?? Kostensoort.Lasten
@@ -254,12 +258,15 @@ namespace WorkerService.Worker
             foreach (var i in agg.Inhuurkosten)
             {
                 var periode = EnsurePeriodeExists(db, i.Jaar, i.Maand, i.Periode);
-                EnsureKostenplaatsExists(db, i.KostenplaatsCode);
+
+                db.SaveChanges();
+
+                EnsureKostenplaatsExists(db, i.KostenplaatsCode, "ONBEKEND");
 
                 if (!db.Inhuurkosten.Any(x =>
-                    x.PeriodeId == periode.Id &&
-                    x.KostenplaatsCode == i.KostenplaatsCode &&
-                    x.Bedrag == i.Bedrag))
+                        x.PeriodeId == periode.Id &&
+                        x.KostenplaatsCode == i.KostenplaatsCode &&
+                        x.Bedrag == i.Bedrag))
                 {
                     db.Inhuurkosten.Add(new Inhuurkosten
                     {
@@ -271,22 +278,22 @@ namespace WorkerService.Worker
             }
         }
 
-        private static void PersistTransacties(DatabaseContextWorker db, MedewerkerAggregate agg)
+
+        private static void PersistTransacties(DatabaseContextWorker db, MedewerkerAggregate agg, int medewerkerId)
         {
             foreach (var t in agg.Transacties)
             {
                 var contract = db.Contracten.FirstOrDefault(c =>
-                    c.MedewerkerNummer == agg.Nummer &&
+                    c.MedewerkerNummer == medewerkerId &&
                     c.Crediteur == t.Crediteur &&
                     c.Rekening == t.Rekening);
 
-                if (contract == null)
-                    continue;
+                if (contract == null) continue;
 
                 if (!db.Transacties.Any(x =>
-                    x.ContractId == contract.Id &&
-                    x.Datum == t.Datum &&
-                    x.Bedrag == t.Bedrag))
+                        x.ContractId == contract.Id &&
+                        x.Datum == t.Datum &&
+                        x.Bedrag == t.Bedrag))
                 {
                     db.Transacties.Add(new Transactie
                     {
@@ -299,8 +306,9 @@ namespace WorkerService.Worker
         }
 
         // ======================================================
-        // Helpers
+        // HELPERS
         // ======================================================
+
         private static Periode EnsurePeriodeExists(DatabaseContextWorker db, int jaar, int maand, PeriodeImport? import)
         {
             var periode = db.Periodes.FirstOrDefault(p => p.Jaar == jaar && p.Maand == maand);
@@ -322,74 +330,64 @@ namespace WorkerService.Worker
         {
             if (string.IsNullOrWhiteSpace(code)) return;
 
-            if (db.OrganisatorischeEenheden.Local.Any(o => o.Code == code)) return;
-
-            if (db.OrganisatorischeEenheden.AsNoTracking().Any(o => o.Code == code))
-                db.OrganisatorischeEenheden.Attach(new OrganisatorischeEenheid { Code = code });
-            else
+            if (!db.OrganisatorischeEenheden.Any(o => o.Code == code))
+            {
                 db.OrganisatorischeEenheden.Add(new OrganisatorischeEenheid
                 {
                     Code = code,
                     Omschrijving = code
                 });
+            }
         }
 
-        private static void EnsureKostenplaatsExists(DatabaseContextWorker db, string? code)
+        private static void EnsureKostenplaatsExists(DatabaseContextWorker db, string? code, string oe)
         {
             if (string.IsNullOrWhiteSpace(code)) return;
 
-            if (db.Kostenplaatsen.Local.Any(k => k.Code == code)) return;
+            EnsureOrganisatorischeEenheidExists(db, oe);
 
-            if (db.Kostenplaatsen.AsNoTracking().Any(k => k.Code == code))
-                db.Kostenplaatsen.Attach(new Kostenplaats { Code = code });
-            else
+            if (!db.Kostenplaatsen.Any(k => k.Code == code))
+            {
                 db.Kostenplaatsen.Add(new Kostenplaats
                 {
                     Code = code,
                     Omschrijving = code,
-                    OrganisatorischeEenheidCode = "ONBEKEND"
+                    OrganisatorischeEenheidCode = oe
                 });
+            }
         }
 
-        private static void EnsureFunctieExists(DatabaseContextWorker db, string code, string? naam)
+        private static void EnsureFunctieExists(DatabaseContextWorker db, string code, string naam)
         {
-            if (db.Functies.Local.Any(f => f.Functiecode == code)) return;
-
-            if (db.Functies.AsNoTracking().Any(f => f.Functiecode == code))
-                db.Functies.Attach(new Functie { Functiecode = code });
-            else
+            if (!db.Functies.Any(f => f.Functiecode == code))
+            {
                 db.Functies.Add(new Functie
                 {
                     Functiecode = code,
-                    Functienaam = naam ?? code
+                    Functienaam = naam
                 });
+            }
         }
 
         private static void EnsureBegrotingExists(DatabaseContextWorker db, int jaar)
         {
-            if (db.Begrotingen.Local.Any(b => b.Jaar == jaar)) return;
-
-            if (db.Begrotingen.AsNoTracking().Any(b => b.Jaar == jaar))
-                db.Begrotingen.Attach(new Begroting { Jaar = jaar });
-            else
+            if (!db.Begrotingen.Any(b => b.Jaar == jaar))
+            {
                 db.Begrotingen.Add(new Begroting
                 {
                     Jaar = jaar,
                     Status = BegrotingStatus.Primair,
                     Totaalbedrag = 0m
                 });
+            }
         }
 
         private static Kostensoort? ParseKostensoort(string? value)
-        {
-            if (string.IsNullOrWhiteSpace(value)) return null;
-
-            return value.Trim().ToLower() switch
+            => value?.Trim().ToLowerInvariant() switch
             {
                 "lasten" => Kostensoort.Lasten,
                 "baten" => Kostensoort.Baten,
                 _ => null
             };
-        }
     }
 }

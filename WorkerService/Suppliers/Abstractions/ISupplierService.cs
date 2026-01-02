@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace WorkerService.Suppliers.Abstractions
+﻿namespace WorkerService.Suppliers.Abstractions
 {
     public interface ISupplierService<T>
     {

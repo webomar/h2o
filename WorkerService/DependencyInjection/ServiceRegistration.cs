@@ -11,14 +11,21 @@ namespace WorkerService.DependencyInjection
             this IServiceCollection services,
             IConfiguration config)
         {
+            // CSV configuraties (per supplier key)
             services.Configure<Dictionary<string, SupplierCsvOptions>>(
                 config.GetSection("Suppliers"));
 
+            // CSV reader
             services.AddSingleton<ICsvReader, CsvReader>();
 
-            // ✅ CONCRETE supplier services
+            // YOUFORCE
             services.AddSingleton<YouforceSupplierService>();
-            services.AddSingleton<ErpXSupplierService>();
+
+            // ERP-X (losse CSV’s)
+            services.AddSingleton<ErpXContractSupplierService>();
+            services.AddSingleton<ErpXBegrotingSupplierService>();
+            services.AddSingleton<ErpXInhuurSupplierService>();
+            services.AddSingleton<ErpXTransactieSupplierService>();
 
             return services;
         }

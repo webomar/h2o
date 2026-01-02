@@ -2,18 +2,19 @@
 using WorkerService.Configuration;
 using WorkerService.Csv;
 using WorkerService.Suppliers.Abstractions;
+using WorkerService.Suppliers.ErpX.Records;
 
 namespace WorkerService.Suppliers.ErpX
 {
-    public class ErpXSupplierService
-        : ISupplierService<ErpXCsvRecord>
+    public class ErpXTransactieSupplierService
+        : ISupplierService<ErpXTransactieCsvRecord>
     {
+        public string SupplierKey => SupplierKeys.ErpXTransactie;
+
         private readonly ICsvReader _csvReader;
         private readonly SupplierCsvOptions _options;
 
-        public string SupplierKey => SupplierKeys.ErpX;
-
-        public ErpXSupplierService(
+        public ErpXTransactieSupplierService(
             ICsvReader csvReader,
             IOptionsMonitor<Dictionary<string, SupplierCsvOptions>> options)
         {
@@ -21,9 +22,7 @@ namespace WorkerService.Suppliers.ErpX
             _options = options.CurrentValue[SupplierKey];
         }
 
-        public IEnumerable<ErpXCsvRecord> Fetch()
-        {
-            return _csvReader.Read<ErpXCsvRecord>(_options);
-        }
+        public IEnumerable<ErpXTransactieCsvRecord> Fetch()
+            => _csvReader.Read<ErpXTransactieCsvRecord>(_options);
     }
 }
