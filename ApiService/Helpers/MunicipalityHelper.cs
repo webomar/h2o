@@ -5,7 +5,7 @@ namespace ApiService.Helpers;
 public static class MunicipalityHelper
 {
     // Mapping tussen AD groepsnamen en MunicipalityId
-    private static readonly Dictionary<string, int> GroupToMunicipalityId = new(StringComparer.OrdinalIgnoreCase)
+    private static readonly Dictionary<string, int> GroupToMunicipalityId = new()
     {
         { "GG_Gebruiker_Hattem", 1 },
         { "GG_Gebruiker_Oldebroek", 2 },
@@ -25,7 +25,7 @@ public static class MunicipalityHelper
             .ToList();
 
         // Zoek naar gemeente rollen: GG_Gebruiker_Hattem, GG_Gebruiker_Oldebroek, GG_Gebruiker_Heerde
-        // Case-insensitive matching
+        // Case-sensitive matching (exacte match vereist)
         foreach (var role in roleClaims)
         {
             if (GroupToMunicipalityId.TryGetValue(role, out var municipalityId))
