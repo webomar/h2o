@@ -23,11 +23,11 @@ namespace ApiService.Controllers
         }
 
         /// <summary>
-        /// Haalt de MunicipalityId op uit de user claims voor filtering
+        /// Haalt de gemeentenaam op uit de user claims voor filtering
         /// </summary>
-        private int? GetUserMunicipalityId()
+        private string? GetUserMunicipality()
         {
-            return MunicipalityHelper.GetMunicipalityIdFromClaims(User);
+            return MunicipalityHelper.GetMunicipalityFromClaims(User);
         }
 
         /// <summary>
@@ -127,13 +127,7 @@ namespace ApiService.Controllers
         {
             try
             {
-                var municipalityId = GetUserMunicipalityId();
-                
-                // Als gebruiker niet in een geldige groep zit, geef geen data terug
-                if (!municipalityId.HasValue)
-                {
-                    return Ok(new List<object>());
-                }
+                var municipality = GetUserMunicipality();
 
                 var query = _context.Begrotingsregels
                     .Include(br => br.Begroting)
@@ -142,11 +136,7 @@ namespace ApiService.Controllers
                             .ThenInclude(d => d.Functie)
                     .Include(br => br.Kostenplaats)
                         .ThenInclude(kp => kp!.OrganisatorischeEenheid)
-                    .Where(br => br.Kostensoort == Kostensoort.Lasten)
-                    // Filter op MunicipalityId
-                    .Where(br => br.Kostenplaats != null && 
-                                 br.Kostenplaats.OrganisatorischeEenheid != null &&
-                                 br.Kostenplaats.OrganisatorischeEenheid.MunicipalityId == municipalityId.Value);
+                    .Where(br => br.Kostensoort == Kostensoort.Lasten);
 
                 if (jaar.HasValue)
                     query = query.Where(br => br.BegrotingJaar == jaar.Value);
@@ -230,28 +220,24 @@ namespace ApiService.Controllers
         {
             try
             {
-                var municipalityId = GetUserMunicipalityId();
-                
-                // Als gebruiker niet in een geldige groep zit, geef geen data terug
-                if (!municipalityId.HasValue)
-                {
-                    return Ok(new List<object>());
-                }
+                var municipality = GetUserMunicipality();
 
                 // Get realized costs from Dienstverband (employment records)
                 // Note: This is a simplified calculation. In reality, you'd calculate actual salary costs
                 // based on Dienstverband data, salary scales, etc.
-                // Note: Dienstverband heeft geen directe link naar OrganisatorischeEenheid, dus skip deze voor nu
-                // of voeg filtering toe via andere relaties indien beschikbaar
+                var dienstverbandQuery = _context.Dienstverbanden
+                    .Include(d => d.Medewerker)
+                    .Include(d => d.Functie)
+                    .Where(d => d.DatumUitDienst == null || (jaar.HasValue && d.DatumUitDienst.Value.Year >= jaar.Value));
+
+                if (!string.IsNullOrEmpty(functiecode))
+                    dienstverbandQuery = dienstverbandQuery.Where(d => d.Functiecode == functiecode);
 
                 // Get Inhuurkosten (hiring costs)
                 var inhuurkostenQuery = _context.Inhuurkosten
                     .Include(i => i.Periode)
                     .Include(i => i.Kostenplaats)
                         .ThenInclude(kp => kp.OrganisatorischeEenheid)
-                    .Where(i => i.Kostenplaats != null && 
-                                i.Kostenplaats.OrganisatorischeEenheid != null &&
-                                i.Kostenplaats.OrganisatorischeEenheid.MunicipalityId == municipalityId.Value)
                     .AsQueryable();
 
                 if (jaar.HasValue)
@@ -288,9 +274,25 @@ namespace ApiService.Controllers
                     })
                     .ToListAsync();
 
-                // Note: Dienstverband costs are not included here as they don't have a direct link to OrganisatorischeEenheid
-                // If needed, this would require additional relationships or a different approach to calculate salary costs
-                // For now, we only return Inhuurkosten which are properly filtered by MunicipalityId
+                // For Dienstverband, we need to estimate costs or use a calculation
+                // This is a placeholder - you'd need actual salary calculation logic
+                var dienstverbandCosts = await dienstverbandQuery
+                    .Select(d => new
+                    {
+                        Jaar = jaar ?? DateTime.Now.Year,
+                        Kwartaal = (int?)null,
+                        Maand = (int?)null,
+                        Functiecode = d.Functiecode,
+                        Functienaam = d.Functie.Functienaam,
+                        OrganisatorischeEenheidCode = (string?)null, // Would need to link via Kostenplaats
+                        OrganisatorischeEenheidOmschrijving = (string?)null,
+                        KostenplaatsCode = (string?)null,
+                        KostenplaatsOmschrijving = (string?)null,
+                        Bedrag = 0m // Placeholder - would need actual salary calculation
+                    })
+                    .ToListAsync();
+
+                // For now, just return inhuurkosten since dienstverbandCosts calculation needs actual salary logic
                 var result = inhuurkosten
                     .GroupBy(x => new
                     {
@@ -336,13 +338,7 @@ namespace ApiService.Controllers
             string? organisatorischeEenheidCode,
             string? kostenplaatsCode)
         {
-            var municipalityId = GetUserMunicipalityId();
-            
-            // Als gebruiker niet in een geldige groep zit, geef geen data terug
-            if (!municipalityId.HasValue)
-            {
-                return new List<PersonnelCostsDto>();
-            }
+            var municipality = GetUserMunicipality();
 
             // Get budgeted costs
             var budgetQuery = _context.Begrotingsregels
@@ -352,11 +348,7 @@ namespace ApiService.Controllers
                         .ThenInclude(d => d.Functie)
                 .Include(br => br.Kostenplaats)
                     .ThenInclude(kp => kp!.OrganisatorischeEenheid)
-                .Where(br => br.Kostensoort == Kostensoort.Lasten)
-                // Filter op MunicipalityId
-                .Where(br => br.Kostenplaats != null && 
-                             br.Kostenplaats.OrganisatorischeEenheid != null &&
-                             br.Kostenplaats.OrganisatorischeEenheid.MunicipalityId == municipalityId.Value);
+                .Where(br => br.Kostensoort == Kostensoort.Lasten);
 
             if (jaar.HasValue)
                 budgetQuery = budgetQuery.Where(br => br.BegrotingJaar == jaar.Value);
@@ -426,11 +418,7 @@ namespace ApiService.Controllers
             IQueryable<Inhuurkosten> realizedQuery = _context.Inhuurkosten
                 .Include(i => i.Periode)
                 .Include(i => i.Kostenplaats)
-                    .ThenInclude(kp => kp.OrganisatorischeEenheid)
-                // Filter op MunicipalityId
-                .Where(i => i.Kostenplaats != null && 
-                            i.Kostenplaats.OrganisatorischeEenheid != null &&
-                            i.Kostenplaats.OrganisatorischeEenheid.MunicipalityId == municipalityId.Value);
+                    .ThenInclude(kp => kp.OrganisatorischeEenheid);
 
             if (jaar.HasValue)
                 realizedQuery = realizedQuery.Where(i => i.Periode.Jaar == jaar.Value);

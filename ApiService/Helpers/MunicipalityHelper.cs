@@ -4,20 +4,19 @@ namespace ApiService.Helpers;
 
 public static class MunicipalityHelper
 {
-    // Mapping tussen AD groepsnamen en MunicipalityId
-    private static readonly Dictionary<string, int> GroupToMunicipalityId = new(StringComparer.OrdinalIgnoreCase)
+    private static readonly HashSet<string> ValidMunicipalities = new()
     {
-        { "GG_Gebruiker_Hattem", 1 },
-        { "GG_Gebruiker_Oldebroek", 2 },
-        { "GG_Gebruiker_Heerde", 3 }
+        "Hattem",
+        "Oldebroek",
+        "Heerde"
     };
 
     /// <summary>
-    /// Haalt de MunicipalityId op uit de user claims op basis van de AD groep rol
+    /// Haalt de gemeentenaam op uit de user claims op basis van de rol
     /// </summary>
     /// <param name="user">De ClaimsPrincipal van de gebruiker</param>
-    /// <returns>De MunicipalityId (1, 2, of 3) of null als geen geldige groep rol gevonden wordt</returns>
-    public static int? GetMunicipalityIdFromClaims(ClaimsPrincipal user)
+    /// <returns>De gemeentenaam (HATTEM, OLDEBROEK, of HEERDE) of null als geen gemeente rol gevonden wordt</returns>
+    public static string? GetMunicipalityFromClaims(ClaimsPrincipal user)
     {
         var roleClaims = user.Claims
             .Where(c => c.Type == ClaimTypes.Role)
@@ -25,12 +24,18 @@ public static class MunicipalityHelper
             .ToList();
 
         // Zoek naar gemeente rollen: GG_Gebruiker_Hattem, GG_Gebruiker_Oldebroek, GG_Gebruiker_Heerde
-        // Case-insensitive matching
+        // Moet exact matchen (case-sensitive)
         foreach (var role in roleClaims)
         {
-            if (GroupToMunicipalityId.TryGetValue(role, out var municipalityId))
+            if (role.StartsWith("GG_Gebruiker_", StringComparison.Ordinal))
             {
-                return municipalityId;
+                var municipality = role.Substring("GG_Gebruiker_".Length);
+                
+                // Controleer of het een geldige gemeente is (exacte case match vereist)
+                if (!string.IsNullOrEmpty(municipality) && ValidMunicipalities.Contains(municipality))
+                {
+                    return municipality.ToUpperInvariant();
+                }
             }
         }
 
@@ -38,27 +43,11 @@ public static class MunicipalityHelper
     }
 
     /// <summary>
-    /// Controleert of de gebruiker een geldige gemeente rol heeft
+    /// Controleert of de gebruiker een gemeente rol heeft
     /// </summary>
     public static bool HasMunicipalityRole(ClaimsPrincipal user)
     {
-        return GetMunicipalityIdFromClaims(user) != null;
-    }
-
-    /// <summary>
-    /// Legacy method - haalt de gemeentenaam op (voor backwards compatibility)
-    /// </summary>
-    [Obsolete("Use GetMunicipalityIdFromClaims instead")]
-    public static string? GetMunicipalityFromClaims(ClaimsPrincipal user)
-    {
-        var municipalityId = GetMunicipalityIdFromClaims(user);
-        return municipalityId switch
-        {
-            1 => "HATTEM",
-            2 => "OLDEBROEK",
-            3 => "HEERDE",
-            _ => null
-        };
+        return GetMunicipalityFromClaims(user) != null;
     }
 }
 
