@@ -1,0 +1,4 @@
+EmployeeNumber;Achternaam;DienstverbandNummer;FunctieCode;FunctieNaam;Type;DatumInDienst;DatumUitDienst;Ancienniteit
+1001;gggg;5001;FUN001;Software Developer;Vast;2022-01-01;;2
+1002;De Vries;5002;FUN002;Tester;Tijdelijk;2023-03-01;;1
+
