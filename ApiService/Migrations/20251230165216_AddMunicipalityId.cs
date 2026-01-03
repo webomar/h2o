@@ -9,49 +9,21 @@ namespace ApiService.Migrations
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            // Drop existing primary key on Code
-            migrationBuilder.DropPrimaryKey(
-                name: "PK_OgranisatorischeEenheid",
-                table: "OgranisatorischeEenheid"
-            );
-
-            // Add new identity column
+            // Add MunicipalityId column (non-nullable with default value)
             migrationBuilder.AddColumn<int>(
-                    name: "MunicipalityId",
-                    table: "OgranisatorischeEenheid",
-                    nullable: false,
-                    defaultValue: 0
-                )
-                .Annotation("SqlServer:Identity", "1, 1");
-
-            // Set new primary key
-            migrationBuilder.AddPrimaryKey(
-                name: "PK_OgranisatorischeEenheid",
-                table: "OgranisatorischeEenheid",
-                column: "MunicipalityId"
-            );
+                name: "MunicipalityId",
+                table: "OrganisatorischeEenheden",
+                type: "int",
+                nullable: false,
+                defaultValue: 0);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            // Drop new primary key
-            migrationBuilder.DropPrimaryKey(
-                name: "PK_OgranisatorischeEenheid",
-                table: "OgranisatorischeEenheid"
-            );
-
             // Remove MunicipalityId column
             migrationBuilder.DropColumn(
                 name: "MunicipalityId",
-                table: "OgranisatorischeEenheid"
-            );
-
-            // Restore primary key on Code
-            migrationBuilder.AddPrimaryKey(
-                name: "PK_OgranisatorischeEenheid",
-                table: "OgranisatorischeEenheid",
-                column: "Code"
-            );
+                table: "OrganisatorischeEenheden");
         }
     }
 }

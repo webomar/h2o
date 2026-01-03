@@ -139,7 +139,7 @@ namespace ApiService.Controllers
                     .Where(br => br.Kostensoort == Kostensoort.Lasten);
 
                 if (jaar.HasValue)
-                    query = query.Where(br => br.BegrotingJaar == jaar.Value);
+                    query = query.Where(br => br.Begroting.Jaar == jaar.Value);
 
                 if (!string.IsNullOrEmpty(functiecode))
                     query = query.Where(br => br.Medewerker != null && 
@@ -156,7 +156,7 @@ namespace ApiService.Controllers
                 var result = await query
                     .Select(br => new
                     {
-                        Jaar = br.BegrotingJaar,
+                        Jaar = br.Begroting.Jaar,
                         Functiecode = br.Medewerker != null && br.Medewerker.Dienstverband != null 
                             ? br.Medewerker.Dienstverband.Functiecode 
                             : null,
@@ -351,7 +351,7 @@ namespace ApiService.Controllers
                 .Where(br => br.Kostensoort == Kostensoort.Lasten);
 
             if (jaar.HasValue)
-                budgetQuery = budgetQuery.Where(br => br.BegrotingJaar == jaar.Value);
+                budgetQuery = budgetQuery.Where(br => br.Begroting.Jaar == jaar.Value);
 
                 if (!string.IsNullOrEmpty(functiecode))
                     budgetQuery = budgetQuery.Where(br => 
@@ -370,7 +370,7 @@ namespace ApiService.Controllers
             var budgetData = await budgetQuery
                 .Select(br => new
                 {
-                    Jaar = br.BegrotingJaar,
+                    Jaar = br.Begroting.Jaar,
                     Functiecode = br.Medewerker != null && br.Medewerker.Dienstverband != null 
                         ? br.Medewerker.Dienstverband.Functiecode 
                         : null,

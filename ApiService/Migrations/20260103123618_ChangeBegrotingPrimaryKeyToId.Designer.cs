@@ -4,6 +4,7 @@ using ApiService.DAL;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ApiService.Migrations
 {
     [DbContext(typeof(DatabaseContextApi))]
-    partial class DatabaseContextApiModelSnapshot : ModelSnapshot
+    [Migration("20260103123618_ChangeBegrotingPrimaryKeyToId")]
+    partial class ChangeBegrotingPrimaryKeyToId
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

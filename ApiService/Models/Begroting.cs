@@ -12,6 +12,8 @@ namespace ApiService.Models
     public class Begroting
     {
         [Key]
+        public int Id { get; set; }
+
         public int Jaar { get; set; }
 
         public BegrotingStatus Status { get; set; }

@@ -13,6 +13,8 @@ namespace ApiService.Models
         [ForeignKey(nameof(Parent))]
         public string? ParentCode { get; set; }
 
+        public int MunicipalityId { get; set; }
+
         // Navigation properties
         public OrganisatorischeEenheid? Parent { get; set; }
         public ICollection<OrganisatorischeEenheid> Children { get; set; } = new List<OrganisatorischeEenheid>();

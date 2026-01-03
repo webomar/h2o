@@ -15,7 +15,7 @@ namespace ApiService.Models
         public int Id { get; set; }
 
         [ForeignKey(nameof(Begroting))]
-        public int BegrotingJaar { get; set; }
+        public int BegrotingId { get; set; }
 
         [ForeignKey(nameof(Medewerker))]
         public int? MedewerkerNummer { get; set; }

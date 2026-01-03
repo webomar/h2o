@@ -70,7 +70,7 @@ namespace ApiService.DAL
 
             // Configure Begroting
             modelBuilder.Entity<Begroting>()
-                .HasKey(b => b.Jaar);
+                .HasKey(b => b.Id);
 
             // Configure Begrotingsregel
             modelBuilder.Entity<Begrotingsregel>()
@@ -79,7 +79,7 @@ namespace ApiService.DAL
             modelBuilder.Entity<Begrotingsregel>()
                 .HasOne(b => b.Begroting)
                 .WithMany(b => b.Begrotingsregels)
-                .HasForeignKey(b => b.BegrotingJaar)
+                .HasForeignKey(b => b.BegrotingId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Begrotingsregel>()
